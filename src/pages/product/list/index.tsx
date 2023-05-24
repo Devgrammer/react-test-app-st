@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 import ResultString from "../../../components/content/result.content";
 import Heading from "../../../components/heading/basic.heading";
 import Pagination from "../../../components/pagination/basic.pagination";
+import SearchBar from "../../../components/searchbar/basic.searchbar";
 import { PAGINATION_LIMIT } from "../../../constants/app.constants";
 import { PaginateDataType, UrlType } from "../../../interface/common";
 import { listProducts } from "../../../services/products";
@@ -19,6 +20,7 @@ const ProductList: FC = () => {
 
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoding] = useState<boolean>(false);
+    
     const [pagination, setPagination] = useState<PaginateDataType>({
         next: null,
         prev: null,
@@ -37,12 +39,20 @@ const ProductList: FC = () => {
         loadProducts();
     }
 
+  
+const getContactIdFromURL = () => {
+        const queryParams = new URLSearchParams(window.location.search);
+        return queryParams.get('contacts');
+    };
+
+let c_id: string | null=getContactIdFromURL();
+
     const loadProducts = async (queryParams?: Record<string, any>) => {
         let query = queryParams || {};
         setLoding(true);
         try {
             const res = await listProducts({
-                query: { ...fixedListParams, ...query }
+                query: c_id !==undefined?{ ...fixedListParams, contacts:`${c_id}` ,...query }:{ ...fixedListParams, ...query }
             });
 
             setProducts(res.data.results);
@@ -81,6 +91,9 @@ const ProductList: FC = () => {
     return (
         <>
             <div style={{ marginBottom: '1rem' }}>
+                <SearchBar
+                pagination={true}
+                />
                 <Heading
                     titleLevel={2}
                 >
@@ -119,6 +132,7 @@ const ProductList: FC = () => {
                     </div>
                 </div>
                 <div style={{ marginBottom: '1rem' }}>
+         
                     <ProductsTable
                         list={products}
                         loading={loading}
